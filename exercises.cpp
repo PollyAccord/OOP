@@ -10,13 +10,6 @@ int Exercises::getType() const {
     return 0;
 };
 
-//печать значений
-/*void Exercises::printExercise() const {
-    std::cout<< "Name:" << name_ <<std::endl;
-    std::cout<<"Time:"<< time_ <<std::endl;
-    std::cout<<"Calories:"<< calory_ <<std::endl;
-};*/
-
 //Получение флага удаления упражнения
 bool Exercises::isDeleted() const {
     return _isdeleted;

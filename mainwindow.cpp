@@ -26,9 +26,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->clearall->setEnabled(false);
     ui->delete_2->setEnabled(false);
     ui->pushButton_2->setEnabled(true);
-    ui->listWidget->resizeMode();
-    //  ui->listWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //  ui->listWidget.set ->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->name->setEnabled(false);
+    ui->time->setEnabled(false);
+    ui->calories->setEnabled(false);
+    ui->techniques->setEnabled(false);
+    ui->type->setVisible(false);
+    ui->add_button->setVisible(false);
+    //ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    //  ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 }
 
@@ -36,23 +41,10 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
-    Exercises *exercise = list->GetExercise(int (ui->listWidget->currentItem()->text().toInt())); //надо получить индекс элемента
-    int k;
-    if (!exercise)
-        k = 0;
-    else
-        k = exercise->getType()+1;
-    Dialog_Add d(this, exercise, k);
-    if (d.exec()) {
-        list->SetExercise(int (ui->listWidget->currentItem()->text().toInt()), d.getExercise());
-        setListWidget(list->getLength());
-    }
-}
 
 void MainWindow::TotalTime() {
     double sum = 0;
-    for (auto i = 0; i<list->NumberOfExercises(); i++) {
+    for (auto i = 0; i<list->getLength(); i++) {
         sum += list->GetExercise(i)->GetTime();
     }
     ui->label_4->setText(QString::number(sum));
@@ -72,38 +64,148 @@ void MainWindow::TotalCalories() {
     }
 }
 
-//Изменение размеров коллекции
-void MainWindow::setListWidget(int n) {
-        if (n>0) {
-            ui->listWidget->setCurrentRow(n);
-            QListWidgetItem *item = 0;
-            for (int i = 0; i<n; i++) {
-             //  item = new QListWidgetItem(QString().setNum(i), list);
-               // item->setFlags(item->flags() | Qt::ItemIsEditable);
-                QAbstractItemModel *model = ui->listWidget->model();
-                model->setData(model->index(i,0), QStringLiteral("#%1").arg(i));
-                ui->listWidget->item(i)->setFlags(Qt::ItemIsEnabled);
-
-//              QListWidgetItem* newItem1 = new QListWidgetItem();
-//                newItem1->setText("Упражнение №"+QString::number(i+1));
-//                ui->listWidget->addItem(newItem1);
-//                ui->listWidget->item(i)->setFlags(Qt::ItemIsEnabled);
-            }
-        }
-    ui->count->setText(QString::number(n));
-    ui->clearall->setEnabled(true);
-}
-
 void MainWindow::on_pushButton_clicked() {
     aim = ui->aim->value();
-    QMessageBox::warning(this, "Message", "Цель задана!");
+    QMessageBox::information(this, "Message", "Цель задана!");
     ui->aim->setEnabled(0);
     ui->pushButton->setEnabled(0);
     ui->label_9->setText(QString::number(aim));
 }
 
-//загрузка файла
-void MainWindow::on_readfile_clicked() {
+int MainWindow::getRowNumber() const {
+    return ui->size->text().toInt();
+}
+
+void MainWindow::on_pushButton_2_clicked() {
+    int n = getRowNumber();
+    ui->pushButton_2->setEnabled(false);
+    ui->size->setEnabled(false);
+    if (list)
+        delete list;
+    if (n <=0) {
+        QMessageBox::critical(this, "Error", "Невозможное количество!");
+        ui->size->setEnabled(true);
+        ui->pushButton_2->setEnabled(true);
+    }
+    else {
+        list = new ListExercises(n);
+        ui->type->setVisible(true);
+        ui->add_button->setVisible(true);
+        QMessageBox::information(this, "Message", "Задано количество упражнений");
+        //  ui->count->setText(QString::number(n));
+        ui->clearall->setEnabled(true);
+        ui->delete_2->setEnabled(true);
+        ui->add_button->setEnabled(true);
+        //setListWidget(n);
+    }
+}
+
+void MainWindow::on_clearall_clicked() {
+    for (int i; i<ui->size->text().toInt(); i++) {
+        list->deleteExercise(i);
+    }
+    ui->listWidget->clear();
+    // setListWidget(0);
+    ui->count->setText("0");
+    ui->clearall->setEnabled(false);
+    ui->delete_2->setEnabled(false);
+    ui->pushButton_2->setEnabled(true);
+    ui->size->setEnabled(true);
+}
+
+void MainWindow::on_delete_2_clicked() {
+    list->deleteExercise(ui->listWidget->currentRow());
+}
+
+void MainWindow::on_add_button_clicked() {
+    std::string temp;
+    // Exercises *exercise;
+    // Dialog_Add d(this, exercise, 0);
+    // Dialog_Add(this, exercise);
+    list->getLength();
+    type_ = ui->type->currentIndex();
+    if (type_ == 1) {
+        ui->count->setText(QString::number(ui->count->text().toInt()+1));
+        std::string name = ui->name->text().toStdString();
+        double time = ui->time->text().toDouble();
+        double calories = ui->calories->text().toDouble();
+        Exercises exercise(name, time, calories);
+        temp = exercise.GetName()+", " + std::to_string(exercise.GetTime())+std::to_string(exercise.GetCalory());
+        list->SetExercise(ui->count->text().toInt()-1, &exercise);
+        ui->listWidget->addItem(temp.c_str());
+    }
+    else if (type_ == 2) {
+        ui->count->setText(QString::number(ui->count->text().toInt()+1));
+        std::string name = ui->name->text().toStdString();
+        double time = ui->time->text().toDouble();
+        double calories = ui->calories->text().toDouble();
+        std::string link = ui->techniques->text().toStdString();
+        ExercisesLink *exerlink;
+        exerlink->SetName(name);
+        exerlink->SetTime(ui->time->text().toDouble());
+        exerlink->SetCalory(calories);
+        exerlink->SetLink(link);
+        std::cout << exerlink;
+        temp = exerlink->GetName()+", " + std::to_string(exerlink->GetTime())+", "+std::to_string(exerlink->GetCalory())+", "+exerlink->GetLink();
+        list->SetExercise(ui->count->text().toInt()-1, exerlink);
+        ui->listWidget->addItem(temp.c_str());
+    }
+    if (ui->count->text().toInt() == list->getLength())
+        ui->add_button->setEnabled(false);
+    else
+        ui->add_button->setEnabled(true);
+}
+
+
+void MainWindow::on_type_currentIndexChanged(int index) {
+    type_ = index;
+    if (type_ == 1) {
+        ui->name->setEnabled(true);
+        ui->time->setEnabled(true);
+        ui->calories->setEnabled(true);
+    }
+    else if (type_ == 2) {
+        ui->techniques->setEnabled(true);
+        ui->name->setEnabled(true);
+        ui->time->setEnabled(true);
+        ui->calories->setEnabled(true);
+    }
+    else if (type_ == 0) {
+        ui->name->setEnabled(false);
+        ui->time->setEnabled(false);
+        ui->calories->setEnabled(false);
+        ui->techniques->setEnabled(false);
+    }
+}
+
+void MainWindow::on_restart_clicked() {
+    list = NULL;
+    ui->label_8->setVisible(false);
+    ui->achieve->setVisible(false);
+    ui->clearall->setEnabled(false);
+    ui->delete_2->setEnabled(false);
+    ui->pushButton_2->setEnabled(true);
+    ui->name->setEnabled(false);
+    ui->time->setEnabled(false);
+    ui->calories->setEnabled(false);
+    ui->techniques->setEnabled(false);
+    ui->type->setVisible(false);
+    ui->aim->setEnabled(true);
+    ui->pushButton->setEnabled(true);
+    ui->size->setEnabled(true);
+    ui->add_button->setVisible(false);
+    ui->size->setValue(0);
+    ui->aim->setValue(0);
+    ui->label_9->setText("0");
+    ui->name->setText("");
+    ui->techniques->setText("");
+    ui->time->setValue(0);
+    ui->calories->setValue(0);
+    on_clearall_clicked();
+}
+
+//открытие файла
+void MainWindow::on_action_triggered() {
     QString filename = QFileDialog::getOpenFileName(this, "Open MeteostationCollection", ".", "JSON files (*.json)");
     if (filename.isEmpty())
         QMessageBox::critical(this, "Error", "File is empty!");
@@ -113,8 +215,6 @@ void MainWindow::on_readfile_clicked() {
         if (list)
             delete list;
         list = templist;
-        int n = list->getLength();
-        setListWidget(n);
         ui->clearall->setEnabled(true);
         ui->delete_2->setEnabled(true);
     }  catch (std::exception) {
@@ -123,7 +223,7 @@ void MainWindow::on_readfile_clicked() {
 }
 
 //сохранение файла
-void MainWindow::on_savefile_clicked() {
+void MainWindow::on_action_2_triggered() {
     int i, j;
     QString filename = QFileDialog::getSaveFileName(this, "Save file", ".", "JSON files (*.json)");
     for (i=0; i<list->getLength() && list->GetExercise(i); i++);
@@ -140,34 +240,4 @@ void MainWindow::on_savefile_clicked() {
 
         }
     }
-}
-
-int MainWindow::getRowNumber() const {
-    return ui->size->text().toInt();
-}
-
-void MainWindow::on_pushButton_2_clicked() {
-    int n = getRowNumber();
-    if (list)
-        delete list;
-    if (n <=0) {
-        QMessageBox::critical(this, "Error", "Impossible size!");
-    }
-    else {
-        list = new ListExercises(n);
-        setListWidget(n);
-    }
-}
-
-void MainWindow::on_clearall_clicked() {
-    delete list;
-    setListWidget(0);
-    ui->count->setText(0);
-    ui->clearall->setEnabled(false);
-    ui->delete_2->setEnabled(false);
-}
-
-void MainWindow::on_delete_2_clicked() {
-    list->deleteExercise(int (ui->listWidget->currentItem()->text().toInt()));
-    setListWidget(list->NumberOfExercises());
 }

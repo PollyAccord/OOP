@@ -15,7 +15,7 @@ class Dialog_Add : public QDialog
     Q_OBJECT
 
 public:
-    explicit Dialog_Add(QWidget *parent = nullptr, Exercises* exer=NULL, int type=0);
+    explicit Dialog_Add(QWidget *parent = nullptr, Exercises *exer = NULL);
      Exercises *getExercise() const;
     ~Dialog_Add();
 

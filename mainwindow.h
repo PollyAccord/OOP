@@ -8,10 +8,11 @@
 #include <QString>
 #include <QJsonParseError>
 #include <QMessageBox>
-#include <QListWidgetItem>
+#include <QTableWidgetItem>
 #include "exercises.h"
 #include "exerciseslink.h"
 #include "listexercises.h"
+#include "QListWidgetItem"
 
 #include <QMainWindow>
 
@@ -28,30 +29,33 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
-    void setListWidget(int n);
-
     void on_pushButton_clicked();
-
-    void on_readfile_clicked();
-
-    void on_savefile_clicked();
 
     void on_pushButton_2_clicked();
 
     void TotalCalories();
     void TotalTime();
 
-
     int getRowNumber() const;
 
     void on_clearall_clicked();
 
+    void on_add_button_clicked();
+
+    void on_type_currentIndexChanged(int index);
+
     void on_delete_2_clicked();
+
+    void on_restart_clicked();
+
+    void on_action_triggered();
+
+    void on_action_2_triggered();
 
 private:
     Ui::MainWindow *ui;
     ListExercises *list;
-    int aim;
+    double aim;
+    int type_ = 0;
 };
 #endif // MAINWINDOW_H

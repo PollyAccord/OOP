@@ -7,24 +7,23 @@
 #include "QAbstractButton"
 
 
-Dialog_Add::Dialog_Add(QWidget *parent,  Exercises* exer, int type) :
+Dialog_Add::Dialog_Add(QWidget *parent, Exercises *exer) :
     QDialog(parent, Qt::WindowCloseButtonHint),
     ui(new Ui::Dialog_Add) {
     ui->setupUi(this);
-    type_ = type;
-    if (type==2)
+    if (type_==2)
         exercise = new ExercisesLink(*((ExercisesLink*)exer));
 
-    else if (type==1)
+    else if (type_==1)
         exercise = new Exercises(*exer);
     else
         exercise = NULL;
     ui->setupUi(this);
-    //ui->name->setText(Exercises::NAME_DEFAULT);
-    //ui->time->setValue(Exercises::TIME_DEFAULT);
-    //ui->calories->setValue(Exercises::CALORY_DEFAULT);
-    //ui->techniques->setText(ExercisesLink::LINK_DEFAULT);
-    // setDialogWindow(type_);
+    ui->name->setText(Exercises::NAME_DEFAULT);
+    ui->time->setValue(Exercises::TIME_DEFAULT);
+    ui->calories->setValue(Exercises::CALORY_DEFAULT);
+    ui->techniques->setText(ExercisesLink::LINK_DEFAULT);
+    setDialogWindow(type_);
     if (type_)
       setValues();
 }
